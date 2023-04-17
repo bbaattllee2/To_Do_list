@@ -1,32 +1,31 @@
 import Head from 'next/head'
 import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
-import Item from '@/components/item.js'
-import { useEffect } from 'react'
+import Task from '@/components/task.js'
+import { useState } from 'react'
+import { nanoid } from 'nanoid'
 
 const inter = Inter({ subsets: ['latin'] })
-var item_data = []
 
 
-function HandleSubmit(event) {
-  // event.preventDefault();
-  const form = event.target;
-  const form_data = new FormData(form)
-  
-  const form_json = Object.fromEntries(form_data.entries());
-  item_data.push(form_json);
-  localStorage.setItem("todoItems",JSON.stringify(item_data));
-}
 
 export default function Home() {
+  const [tasks, setTask] = useState([])
   
-  useEffect(() => {
-    // localStorage.clear();
-    let storedItems = JSON.parse(localStorage.getItem("todoItems"));
-    if (storedItems) {
-      item_data = storedItems
-    }
-  }, []);
+  function handleSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const form_data = new FormData(form)
+    
+    const form_object = Object.fromEntries(form_data.entries());
+    form_object.id = `${form_object.name}-${nanoid()}`
+    setTask([...tasks, form_object])
+  }
+
+  function deleteTask(id) {
+    const removed_task_list = tasks.filter((task) => (id !== task.id));
+    setTask(removed_task_list);
+  }
 
   return (
     <>
@@ -41,20 +40,21 @@ export default function Home() {
           <h1 className={styles.h1}> To-Do List</h1>
         </div>
         <ul>
-          {item_data.map((item, index) => <li key={item.itemName+index}><Item item_name={item.itemName} item_due_date={item.itemDueDate}/></li>)}
+          {tasks.map((task) => <li key={task.id}><Task name={task.name} due_date={task.due_date} id={task.id} deleteTask={deleteTask}/></li>)}
         </ul>
 
-        <form onSubmit={HandleSubmit}>
+        <form onSubmit={handleSubmit}>
           <label className={styles.label}>
-            Enter item needing done: <input type="text" name="itemName"></input>
+            Enter item needing done: <input type="text" name="name"></input>
           </label>
           <br/>
           <label>
-            Date Needed done by: <input type="date" name="itemDueDate"></input>
+            Date Needed done by: <input type="date" name="due_date"></input>
           </label>
           <br/>
           <button type="submit">Add List Item</button>
         </form>
+          <button onClick={() => setTask([])}>Clear All Items From List</button>
       </main>
     </>
   )
