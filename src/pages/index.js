@@ -8,9 +8,9 @@ import { nanoid } from 'nanoid'
 const inter = Inter({ subsets: ['latin'] })
 
 
-
 export default function Home() {
-  const [tasks, setTask] = useState([])
+  const [tasks, setTask] = useState([]);
+  const [errors, setErrors] = useState({});
   
   function handleSubmit(event) {
     event.preventDefault();
@@ -19,12 +19,34 @@ export default function Home() {
     
     const form_object = Object.fromEntries(form_data.entries());
     form_object.id = `${form_object.name}-${nanoid()}`
-    setTask([...tasks, form_object])
+    if (handleValidation(form_object)) {
+      setTask([...tasks, form_object])
+    }
   }
 
   function deleteTask(id) {
     const removed_task_list = tasks.filter((task) => (id !== task.id));
     setTask(removed_task_list);
+  }
+
+  function handleValidation(form_object) {
+    const temp_errors = {}
+    if (form_object.name === "") {
+      temp_errors.name = "Name cannot be blank!"
+    }
+    if (form_object.due_date === "") {
+      temp_errors.due_date = "Due date must be selected"
+    } 
+    setErrors(temp_errors);
+    return !Object.keys(temp_errors).length
+  }
+
+  function createErrors(input_name) {
+    if (errors[input_name]) {
+      return (
+        <label>{errors[input_name]}</label>
+      )
+    } 
   }
 
   return (
@@ -45,11 +67,11 @@ export default function Home() {
 
         <form onSubmit={handleSubmit}>
           <label className={styles.label}>
-            Enter item needing done: <input type="text" name="name"></input>
+            Enter item needing done: <input type="text" name="name"></input> {createErrors("name")}
           </label>
           <br/>
           <label>
-            Date Needed done by: <input type="date" name="due_date"></input>
+            Date Needed done by: <input type="date" name="due_date"></input> {createErrors("due_date")}
           </label>
           <br/>
           <button type="submit">Add List Item</button>
