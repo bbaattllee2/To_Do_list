@@ -4,13 +4,20 @@ import styles from '@/styles/Home.module.css'
 import Task from '@/components/task.js'
 import { useState } from 'react'
 import { nanoid } from 'nanoid'
+import Login from './login'
 
 const inter = Inter({ subsets: ['latin'] })
 
+// TODO: Add 'react-form-hook' to the pages to make them more seemless
 
 export default function Home() {
+  const [token, setToken] = useState();
   const [tasks, setTask] = useState([]);
   const [errors, setErrors] = useState({});
+
+  if (!token) {
+    return <Login setToken={setToken}/>
+  }
   
   function handleSubmit(event) {
     event.preventDefault();
@@ -52,7 +59,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Todo List App</title>
+        <title>Todo App</title>
         <meta name="description" content="Todo List App" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
